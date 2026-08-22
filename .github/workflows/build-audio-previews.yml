@@ -34,7 +34,15 @@ jobs:
       - name: Read album slug
         run: echo "ALBUM_SLUG=$(node -p \"JSON.parse(require('fs').readFileSync('${{ inputs.job_file }}','utf8')).albumSlug\")" >> "$GITHUB_ENV"
 
-      - name: Publish previews to cPanel over FTPS
+      - name: Keep generated files for download
+        uses: actions/upload-artifact@v4
+        with:
+          name: audio-previews-${{ env.ALBUM_SLUG }}
+          path: preview-dist/
+          retention-days: 3
+
+      - name: Publish previews to cPanel over FTPS when configured
+        continue-on-error: true
         env:
           FTP_HOST: ${{ secrets.CPANEL_FTP_HOST }}
           FTP_USER: ${{ secrets.CPANEL_FTP_USER }}
@@ -43,10 +51,3 @@ jobs:
         run: |
           test -n "$FTP_HOST" && test -n "$FTP_USER" && test -n "$FTP_PASSWORD" && test -n "$FTP_REMOTE_ROOT"
           lftp -e "set ftp:ssl-force true; set ssl:verify-certificate yes; mkdir -p $FTP_REMOTE_ROOT/previews/$ALBUM_SLUG; mirror -R --delete --verbose preview-dist/$ALBUM_SLUG/ $FTP_REMOTE_ROOT/previews/$ALBUM_SLUG/; bye" -u "$FTP_USER,$FTP_PASSWORD" "$FTP_HOST"
-
-      - name: Keep generated files for inspection
-        uses: actions/upload-artifact@v4
-        with:
-          name: audio-previews
-          path: preview-dist/
-          retention-days: 3
