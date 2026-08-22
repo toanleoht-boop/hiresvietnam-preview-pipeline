@@ -38,7 +38,7 @@ for (const [index, track] of job.tracks.entries()) {
 
   console.log(`\n[${index + 1}/${job.tracks.length}] ${track.title}`);
   if (/drive\.google\.com|docs\.google\.com/.test(sourceUrl)) {
-    run('gdown', ['--fuzzy', sourceUrl, '-O', sourcePath]);
+    run('gdown', [sourceUrl, '-O', sourcePath]);
   } else {
     run('curl', ['-L', '--fail', '--retry', '3', sourceUrl, '-o', sourcePath]);
   }
