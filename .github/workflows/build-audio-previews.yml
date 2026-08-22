@@ -41,22 +41,17 @@ jobs:
           path: preview-dist/
           retention-days: 3
 
-      - name: Publish previews to cPanel over HTTPS API
+      - name: Publish previews to Hi-Res Việt Nam
         env:
-          CPANEL_HOST: ${{ secrets.CPANEL_API_HOST }}
-          CPANEL_USER: ${{ secrets.CPANEL_API_USER }}
-          CPANEL_TOKEN: ${{ secrets.CPANEL_API_TOKEN }}
+          PREVIEW_UPLOAD_TOKEN: ${{ secrets.PREVIEW_UPLOAD_TOKEN }}
         run: |
-          test -n "$CPANEL_HOST" && test -n "$CPANEL_USER" && test -n "$CPANEL_TOKEN"
-          curl --fail-with-body --silent --show-error \
-            -H "Authorization: cpanel $CPANEL_USER:$CPANEL_TOKEN" \
-            "https://$CPANEL_HOST:2083/json-api/cpanel?cpanel_jsonapi_user=$CPANEL_USER&cpanel_jsonapi_apiversion=2&cpanel_jsonapi_module=Fileman&cpanel_jsonapi_func=mkdir&path=hiresvietnam.site%2Fpreviews&name=$ALBUM_SLUG" || true
+          test -n "$PREVIEW_UPLOAD_TOKEN"
           for file in preview-dist/$ALBUM_SLUG/*; do
             echo "Uploading $(basename "$file")"
             response=$(curl --fail-with-body --silent --show-error \
-              -H "Authorization: cpanel $CPANEL_USER:$CPANEL_TOKEN" \
-              -F "dir=hiresvietnam.site/previews/$ALBUM_SLUG" \
-              -F "file-1=@$file" \
-              "https://$CPANEL_HOST:2083/execute/Fileman/upload_files")
-            echo "$response" | jq -e '.result.status == 1' >/dev/null
+              -H "Authorization: Bearer $PREVIEW_UPLOAD_TOKEN" \
+              -F "albumSlug=$ALBUM_SLUG" \
+              -F "file=@$file" \
+              "https://hiresvietnam.site/api/upload-preview.php")
+            echo "$response" | jq -e '.success == true' >/dev/null
           done
