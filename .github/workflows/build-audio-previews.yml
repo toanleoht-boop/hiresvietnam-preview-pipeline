@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       job_file:
-        description: "Đường dẫn job JSON, ví dụ preview-jobs/giao-huong-dam-cuoi.json"
+        description: "Preview job JSON path"
         required: true
         default: "preview-jobs/giao-huong-dam-cuoi.json"
 
@@ -59,60 +59,3 @@ jobs:
           git add .nojekyll "previews/$ALBUM_SLUG"
           git commit -m "Publish previews for $ALBUM_SLUG"
           git push --force origin gh-pages
-name: Build audio previews
-
-on:
-  workflow_dispatch:
-    inputs:
-      job_file:
-        description: "Đường dẫn job JSON, ví dụ preview-jobs/giao-huong-dam-cuoi.json"
-        required: true
-        default: "preview-jobs/giao-huong-dam-cuoi.json"
-
-permissions:
-  contents: read
-
-concurrency:
-  group: audio-preview-${{ inputs.job_file }}
-  cancel-in-progress: false
-
-jobs:
-  convert-and-publish:
-    runs-on: ubuntu-latest
-    timeout-minutes: 45
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install Drive downloader and uploader
-        run: |
-          python -m pip install --disable-pip-version-check gdown
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq ffmpeg lftp
-
-      - name: Build MP3 previews
-        run: node scripts/build-audio-previews.mjs --job "${{ inputs.job_file }}" --output preview-dist
-
-      - name: Read album slug
-        run: echo "ALBUM_SLUG=$(jq -r '.albumSlug' '${{ inputs.job_file }}')" >> "$GITHUB_ENV"
-
-      - name: Keep generated files for download
-        uses: actions/upload-artifact@v4
-        with:
-          name: audio-previews-${{ env.ALBUM_SLUG }}
-          path: preview-dist/
-          retention-days: 3
-
-      - name: Publish previews to Hi-Res Việt Nam
-        env:
-          PREVIEW_UPLOAD_TOKEN: ${{ secrets.PREVIEW_UPLOAD_TOKEN }}
-        run: |
-          test -n "$PREVIEW_UPLOAD_TOKEN"
-          for file in preview-dist/$ALBUM_SLUG/*; do
-            echo "Uploading $(basename "$file")"
-            response=$(curl --fail-with-body --silent --show-error \
-              -H "Authorization: Bearer $PREVIEW_UPLOAD_TOKEN" \
-              -F "albumSlug=$ALBUM_SLUG" \
-              -F "file=@$file" \
-              "https://hiresvietnam.site/api/upload-preview.php")
-            echo "$response" | jq -e '.success == true' >/dev/null
-          done
