@@ -32,7 +32,7 @@ jobs:
         run: node scripts/build-audio-previews.mjs --job "${{ inputs.job_file }}" --output preview-dist
 
       - name: Read album slug
-        run: echo "ALBUM_SLUG=$(node -p \"JSON.parse(require('fs').readFileSync('${{ inputs.job_file }}','utf8')).albumSlug\")" >> "$GITHUB_ENV"
+        run: echo "ALBUM_SLUG=$(jq -r '.albumSlug' '${{ inputs.job_file }}')" >> "$GITHUB_ENV"
 
       - name: Keep generated files for download
         uses: actions/upload-artifact@v4
