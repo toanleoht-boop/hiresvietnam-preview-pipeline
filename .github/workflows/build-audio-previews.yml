@@ -1,0 +1,52 @@
+name: Build audio previews
+
+on:
+  workflow_dispatch:
+    inputs:
+      job_file:
+        description: "Đường dẫn job JSON, ví dụ preview-jobs/giao-huong-dam-cuoi.json"
+        required: true
+        default: "preview-jobs/giao-huong-dam-cuoi.json"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: audio-preview-${{ inputs.job_file }}
+  cancel-in-progress: false
+
+jobs:
+  convert-and-publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Drive downloader and uploader
+        run: |
+          python -m pip install --disable-pip-version-check gdown
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg lftp
+
+      - name: Build MP3 previews
+        run: node scripts/build-audio-previews.mjs --job "${{ inputs.job_file }}" --output preview-dist
+
+      - name: Read album slug
+        run: echo "ALBUM_SLUG=$(node -p \"JSON.parse(require('fs').readFileSync('${{ inputs.job_file }}','utf8')).albumSlug\")" >> "$GITHUB_ENV"
+
+      - name: Publish previews to cPanel over FTPS
+        env:
+          FTP_HOST: ${{ secrets.CPANEL_FTP_HOST }}
+          FTP_USER: ${{ secrets.CPANEL_FTP_USER }}
+          FTP_PASSWORD: ${{ secrets.CPANEL_FTP_PASSWORD }}
+          FTP_REMOTE_ROOT: ${{ secrets.CPANEL_FTP_REMOTE_ROOT }}
+        run: |
+          test -n "$FTP_HOST" && test -n "$FTP_USER" && test -n "$FTP_PASSWORD" && test -n "$FTP_REMOTE_ROOT"
+          lftp -e "set ftp:ssl-force true; set ssl:verify-certificate yes; mkdir -p $FTP_REMOTE_ROOT/previews/$ALBUM_SLUG; mirror -R --delete --verbose preview-dist/$ALBUM_SLUG/ $FTP_REMOTE_ROOT/previews/$ALBUM_SLUG/; bye" -u "$FTP_USER,$FTP_PASSWORD" "$FTP_HOST"
+
+      - name: Keep generated files for inspection
+        uses: actions/upload-artifact@v4
+        with:
+          name: audio-previews
+          path: preview-dist/
+          retention-days: 3
