@@ -1,0 +1,14 @@
+{
+  "albumSlug": "giao-huong-dam-cuoi",
+  "previewStart": 15,
+  "previewDuration": 90,
+  "bitrate": "160k",
+  "tracks": [
+    {
+      "id": "TRACK_ID_FROM_FIRESTORE",
+      "title": "Bằng Lòng Đi Em",
+      "mp3Url": "https://drive.google.com/file/d/GOOGLE_DRIVE_MP3_FILE_ID/view",
+      "hiresUrl": "https://drive.google.com/file/d/GOOGLE_DRIVE_WAV_FILE_ID/view"
+    }
+  ]
+}
