@@ -41,13 +41,22 @@ jobs:
           path: preview-dist/
           retention-days: 3
 
-      - name: Publish previews to cPanel over FTPS when configured
-        continue-on-error: true
+      - name: Publish previews to cPanel over HTTPS API
         env:
-          FTP_HOST: ${{ secrets.CPANEL_FTP_HOST }}
-          FTP_USER: ${{ secrets.CPANEL_FTP_USER }}
-          FTP_PASSWORD: ${{ secrets.CPANEL_FTP_PASSWORD }}
-          FTP_REMOTE_ROOT: ${{ secrets.CPANEL_FTP_REMOTE_ROOT }}
+          CPANEL_HOST: ${{ secrets.CPANEL_API_HOST }}
+          CPANEL_USER: ${{ secrets.CPANEL_API_USER }}
+          CPANEL_TOKEN: ${{ secrets.CPANEL_API_TOKEN }}
         run: |
-          test -n "$FTP_HOST" && test -n "$FTP_USER" && test -n "$FTP_PASSWORD" && test -n "$FTP_REMOTE_ROOT"
-          lftp -e "set ftp:ssl-force true; set ssl:verify-certificate yes; mkdir -p $FTP_REMOTE_ROOT/previews/$ALBUM_SLUG; mirror -R --delete --verbose preview-dist/$ALBUM_SLUG/ $FTP_REMOTE_ROOT/previews/$ALBUM_SLUG/; bye" -u "$FTP_USER,$FTP_PASSWORD" "$FTP_HOST"
+          test -n "$CPANEL_HOST" && test -n "$CPANEL_USER" && test -n "$CPANEL_TOKEN"
+          curl --fail-with-body --silent --show-error \
+            -H "Authorization: cpanel $CPANEL_USER:$CPANEL_TOKEN" \
+            "https://$CPANEL_HOST:2083/json-api/cpanel?cpanel_jsonapi_user=$CPANEL_USER&cpanel_jsonapi_apiversion=2&cpanel_jsonapi_module=Fileman&cpanel_jsonapi_func=mkdir&path=hiresvietnam.site%2Fpreviews&name=$ALBUM_SLUG" || true
+          for file in preview-dist/$ALBUM_SLUG/*; do
+            echo "Uploading $(basename "$file")"
+            response=$(curl --fail-with-body --silent --show-error \
+              -H "Authorization: cpanel $CPANEL_USER:$CPANEL_TOKEN" \
+              -F "dir=hiresvietnam.site/previews/$ALBUM_SLUG" \
+              -F "file-1=@$file" \
+              "https://$CPANEL_HOST:2083/execute/Fileman/upload_files")
+            echo "$response" | jq -e '.result.status == 1' >/dev/null
+          done
