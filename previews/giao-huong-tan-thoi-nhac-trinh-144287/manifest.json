@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "albumSlug": "giao-huong-tan-thoi-nhac-trinh-144287",
+  "generatedAt": "2026-08-25T06:19:43.485Z",
+  "tracks": [
+    {
+      "trackId": "track_album_1787638144287_0",
+      "title": "Cát Bụi (Ver 2)",
+      "previewUrl": "https://toanleoht-boop.github.io/hiresvietnam-preview-pipeline/previews/giao-huong-tan-thoi-nhac-trinh-144287/01-cat-bui-ver-2.mp3"
+    },
+    {
+      "trackId": "track_album_1787638144287_1",
+      "title": "Cát Bụi",
+      "previewUrl": "https://toanleoht-boop.github.io/hiresvietnam-preview-pipeline/previews/giao-huong-tan-thoi-nhac-trinh-144287/02-cat-bui.mp3"
+    },
+    {
+      "trackId": "track_album_1787638144287_2",
+      "title": "Còn Tuổi Nào Cho Em",
+      "previewUrl": "https://toanleoht-boop.github.io/hiresvietnam-preview-pipeline/previews/giao-huong-tan-thoi-nhac-trinh-144287/03-con-tuoi-nao-cho-em.mp3"
+    },
+    {
+      "trackId": "track_album_1787638144287_3",
+      "title": "Diễm Xưa",
+      "previewUrl": "https://toanleoht-boop.github.io/hiresvietnam-preview-pipeline/previews/giao-huong-tan-thoi-nhac-trinh-144287/04-diem-xua.mp3"
+    },
+    {
+      "trackId": "track_album_1787638144287_4",
+      "title": "Hạ Trắng",
+      "previewUrl": "https://toanleoht-boop.github.io/hiresvietnam-preview-pipeline/previews/giao-huong-tan-thoi-nhac-trinh-144287/05-ha-trang.mp3"
+    },
+    {
+      "trackId": "track_album_1787638144287_5",
+      "title": "Một Cõi Đi Về (Ver 2)",
+      "previewUrl": "https://toanleoht-boop.github.io/hiresvietnam-preview-pipeline/previews/giao-huong-tan-thoi-nhac-trinh-144287/06-mot-coi-di-ve-ver-2.mp3"
+    },
+    {
+      "trackId": "track_album_1787638144287_6",
+      "title": "Một Cõi Đi Về",
+      "previewUrl": "https://toanleoht-boop.github.io/hiresvietnam-preview-pipeline/previews/giao-huong-tan-thoi-nhac-trinh-144287/07-mot-coi-di-ve.mp3"
+    }
+  ]
+}
